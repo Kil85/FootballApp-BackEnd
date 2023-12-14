@@ -1,7 +1,9 @@
-﻿using FootballResultsApi.Models;
-using FootballResultsApi.Services;
+﻿using FootballResultsApi.Entities;
+using FootballResultsApi.Interfaces;
+using FootballResultsApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RestSharp;
 
 namespace FootballResultsApi.Controllers
 {
@@ -29,24 +31,50 @@ namespace FootballResultsApi.Controllers
         {
             var jwtToken = _accountService.Login(login);
 
+            //var jwtToken = new test(_accountService.Login(login));
+
             return Ok(jwtToken);
         }
 
-        //[HttpGet("all")]
-        //[Authorize("admin")]
-        //public ActionResult All()
-        //{
-        //    var result = _accountService.GetAllUsers();
+        [HttpGet("{id}")]
+        public ActionResult GetUserById([FromRoute] string id)
+        {
+            return null;
+        }
 
-        //    return Ok(result);
-        //}
+        [HttpPatch("edit/{id}")]
+        public ActionResult EditUser([FromRoute] string id, [FromBody] User user)
+        {
+            return null;
+        }
 
-        //[HttpGet("{id}")]
-        //[Authorize]
-        //public ActionResult Get([FromRoute] int id)
-        //{
-        //    var user = _accountService.GetUserById(id);
-        //    return Ok(user);
-        //}
+        [HttpDelete("{id}")]
+        public ActionResult DeleteUser([FromRoute] string id)
+        {
+            return null;
+        }
+
+        [HttpPut("changerole/{id}")]
+        public ActionResult ChangeRole([FromRoute] string id, [FromBody] Role role)
+        {
+            return null;
+        }
+
+        [HttpGet("all")]
+        public ActionResult GetAll()
+        {
+            var users = _accountService.getAllUsers();
+            return Ok(users.ToList());
+        }
+    }
+
+    class test
+    {
+        public string jwt { get; set; }
+
+        public test(string j)
+        {
+            this.jwt = j;
+        }
     }
 }

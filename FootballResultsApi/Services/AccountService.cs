@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using FootballResultsApi.Authentication;
 using FootballResultsApi.Entities;
 using FootballResultsApi.Exceptions;
+using FootballResultsApi.Interfaces;
 using FootballResultsApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,29 +21,22 @@ namespace FootballResultsApi.Services
 
         private readonly IPasswordHasher<User> _passwordHasher;
 
-        ////private readonly AuthenticationSettings _authenticationSettings;
+        private readonly AuthenticationSettings _authenticationSettings;
         private readonly ILogger<AccountService> _logger;
 
-        //private readonly IAuthorizationService _authorizationService;
-
-        //private readonly IUserContextService _userContextService;
         public AccountService(
             IMapper mapper,
             FootballResultsDbContext dbContext,
             IPasswordHasher<User> passwordHasher,
-            //    //AuthenticationSettings authenticationSettings,
-            //    IAuthorizationService authorizationService,
+            AuthenticationSettings authenticationSettings,
             ILogger<AccountService> logger
-        ////IUserContextService userContextService
         )
         {
             _mapper = mapper;
             _dbContext = dbContext;
             _passwordHasher = passwordHasher;
-            //    ////_authenticationSettings = authenticationSettings;
-            //    //_authorizationService = authorizationService;
+            _authenticationSettings = authenticationSettings;
             _logger = logger;
-            //    //_userContextService = userContextService;
         }
 
         public int Register(LoginUserDto userDto)
@@ -49,6 +44,7 @@ namespace FootballResultsApi.Services
             var user = _mapper.Map<User>(userDto);
             var hashedPassword = _passwordHasher.HashPassword(user, userDto.Password);
             user.HashedPassword = hashedPassword;
+            user.Role = new Role();
 
             _dbContext.Add(user);
             _dbContext.SaveChanges();
@@ -57,7 +53,9 @@ namespace FootballResultsApi.Services
 
         public string Login(LoginUserDto loginDto)
         {
-            var user = _dbContext.Users.FirstOrDefault(u => u.Email == loginDto.Email);
+            var user = _dbContext.Users
+                .Include(r => r.Role)
+                .FirstOrDefault(u => u.Email == loginDto.Email);
 
             if (user == null)
             {
@@ -75,30 +73,35 @@ namespace FootballResultsApi.Services
                 throw new LoginFailedException("Email or Password incorrect");
             }
 
-            //var claims = new List<Claim>()
-            //{
-            //    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            //    new Claim(ClaimTypes.Role, user.Role.Name)
-            //};
+            var claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role.Name.ToString()),
+                new Claim(ClaimTypes.Email, user.Email.ToString())
+            };
 
-            //var key = new SymmetricSecurityKey(
-            //    Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey)
-            //);
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey)
+            );
 
-            //var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            //var expires = DateTime.Now.AddDays(_authenticationSettings.JwtExpiredDays);
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.Now.AddDays(_authenticationSettings.JwtExpiredDays);
 
-            //var token = new JwtSecurityToken(
-            //    _authenticationSettings.JwtIssuer,
-            //    _authenticationSettings.JwtIssuer,
-            //    claims,
-            //    expires: expires,
-            //    signingCredentials: cred
-            //);
+            var token = new JwtSecurityToken(
+                _authenticationSettings.JwtIssuer,
+                _authenticationSettings.JwtIssuer,
+                claims,
+                expires: expires,
+                signingCredentials: cred
+            );
 
-            //var tokenHandler = new JwtSecurityTokenHandler();
-            //return tokenHandler.WriteToken(token);
-            return "OK";
+            var tokenHandler = new JwtSecurityTokenHandler();
+            return tokenHandler.WriteToken(token);
+        }
+
+        public IEnumerable<User> getAllUsers()
+        {
+            return _dbContext.Users.Include(r => r.Role);
         }
     }
 }

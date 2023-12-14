@@ -8,5 +8,37 @@ namespace FootballResultsApi.Entities
             : base(options) { }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Fixture> Fixtures { get; set; }
+        public DbSet<League> Leagues { get; set; }
+        public DbSet<Team> Teams { get; set; }
+        public DbSet<Country> Countries { get; set; }
+        public DbSet<MetaData> MetaDatas { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder
+                .Entity<Fixture>()
+                .HasOne(f => f.HomeTeam)
+                .WithMany(t => t.Fixtures)
+                .HasForeignKey(f => f.HomeTeamId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder
+                .Entity<Fixture>()
+                .HasOne(f => f.AwayTeam)
+                .WithMany()
+                .HasForeignKey(f => f.AwayTeamId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder
+                .Entity<Fixture>()
+                .HasOne(f => f.League)
+                .WithMany(l => l.Fixtures)
+                .HasForeignKey(f => f.LeagueId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }
