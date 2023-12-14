@@ -12,7 +12,8 @@ namespace FootballResultsApi.Entities
         public DbSet<Fixture> Fixtures { get; set; }
         public DbSet<League> Leagues { get; set; }
         public DbSet<Team> Teams { get; set; }
-        public DbSet<Country> Countries { get; set; }
+
+        //public DbSet<Country> Countries { get; set; }
         public DbSet<MetaData> MetaDatas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,6 +38,11 @@ namespace FootballResultsApi.Entities
                 .WithMany(l => l.Fixtures)
                 .HasForeignKey(f => f.LeagueId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<League>().Property(e => e.Id).ValueGeneratedNever();
+
+            modelBuilder.Entity<Team>().Property(e => e.Id).ValueGeneratedNever();
+            modelBuilder.Entity<Fixture>().Property(e => e.Id).ValueGeneratedNever();
 
             base.OnModelCreating(modelBuilder);
         }

@@ -90,7 +90,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 var scope = app.Services.CreateScope();
 var fetchApi = scope.ServiceProvider.GetRequiredService<FetchApiData>();
 
-fetchApi.FeachFixtures();
+await fetchApi.FeachFixtures();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

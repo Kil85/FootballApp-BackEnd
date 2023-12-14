@@ -1,4 +1,6 @@
-﻿namespace FootballResultsApi.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace FootballResultsApi.Entities
 {
     public class Team
     {
