@@ -12,8 +12,8 @@
         public int LeagueId { get; set; }
         public virtual League League { get; set; }
 
-        //public int? VenueId { get; set; }
-        //public virtual Venue Venue { get; set; }
+        public int MetaDataId { get; set; }
+        public virtual MetaData MetaData { get; set; }
         public int HomeTeamId { get; set; }
         public virtual Team HomeTeam { get; set; }
         public int AwayTeamId { get; set; }

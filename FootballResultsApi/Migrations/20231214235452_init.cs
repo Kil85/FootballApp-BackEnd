@@ -104,6 +104,7 @@ namespace FootballResultsApi.Migrations
                     HomeTeamGoals = table.Column<int>(type: "int", nullable: true),
                     AwayTeamGoals = table.Column<int>(type: "int", nullable: true),
                     LeagueId = table.Column<int>(type: "int", nullable: false),
+                    MetaDataId = table.Column<int>(type: "int", nullable: false),
                     HomeTeamId = table.Column<int>(type: "int", nullable: false),
                     AwayTeamId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -116,6 +117,12 @@ namespace FootballResultsApi.Migrations
                         principalTable: "Leagues",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Fixtures_MetaDatas_MetaDataId",
+                        column: x => x.MetaDataId,
+                        principalTable: "MetaDatas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Fixtures_Teams_AwayTeamId",
                         column: x => x.AwayTeamId,
@@ -146,6 +153,11 @@ namespace FootballResultsApi.Migrations
                 column: "LeagueId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Fixtures_MetaDataId",
+                table: "Fixtures",
+                column: "MetaDataId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Teams_LeagueId",
                 table: "Teams",
                 column: "LeagueId");
@@ -163,10 +175,10 @@ namespace FootballResultsApi.Migrations
                 name: "Fixtures");
 
             migrationBuilder.DropTable(
-                name: "MetaDatas");
+                name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "MetaDatas");
 
             migrationBuilder.DropTable(
                 name: "Teams");

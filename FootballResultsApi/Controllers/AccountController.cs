@@ -1,8 +1,12 @@
-﻿using FootballResultsApi.Entities;
+﻿using AutoMapper;
+using FootballResultsApi.Entities;
 using FootballResultsApi.Interfaces;
 using FootballResultsApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.SqlServer.Server;
 using RestSharp;
 
 namespace FootballResultsApi.Controllers
@@ -12,10 +16,18 @@ namespace FootballResultsApi.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
+        private readonly FootballResultsDbContext _context;
+        private readonly IMapper _mapper;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(
+            IAccountService accountService,
+            FootballResultsDbContext context,
+            IMapper mapper
+        )
         {
             _accountService = accountService;
+            _context = context;
+            _mapper = mapper;
         }
 
         [HttpPost("register")]
@@ -36,10 +48,31 @@ namespace FootballResultsApi.Controllers
             return Ok(jwtToken);
         }
 
-        [HttpGet("{id}")]
-        public ActionResult GetUserById([FromRoute] string id)
+        [HttpGet("/mecze")]
+        public ActionResult GetUserById([FromQuery] string date)
         {
-            return null;
+            if (DateTime.TryParse(date, out DateTime parsedDate))
+            {
+                DateOnly dateOnly = new DateOnly(parsedDate.Year, parsedDate.Month, parsedDate.Day);
+                //var time = DateOnly.FromDateTime(DateTime.Now).AddDays(-1);
+                var result = _context.Fixtures
+                    .Include(r => r.League)
+                    .Include(m => m.MetaData)
+                    .Include(h => h.HomeTeam)
+                    .Include(h => h.AwayTeam)
+                    .ToList();
+
+                var a = result.FindAll(f => f.MetaData.FixtureDate == dateOnly);
+
+                var r = _mapper.Map<List<FixtureDto>>(a);
+
+                return Ok(r);
+            }
+            else
+            {
+                Console.WriteLine("Nieudane parsowanie daty.");
+            }
+            return BadRequest();
         }
 
         [HttpPatch("edit/{id}")]
@@ -65,16 +98,6 @@ namespace FootballResultsApi.Controllers
         {
             var users = _accountService.getAllUsers();
             return Ok(users.ToList());
-        }
-    }
-
-    class test
-    {
-        public string jwt { get; set; }
-
-        public test(string j)
-        {
-            this.jwt = j;
         }
     }
 }

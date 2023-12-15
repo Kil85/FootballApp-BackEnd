@@ -8,9 +8,6 @@ namespace FootballResultsApi.Entities
         public string Name { get; set; }
         public string Logo { get; set; }
         public List<Team> Teams { get; set; }
-
-        //public int CountryId { get; set; }
-        //public virtual Country Country { get; set; }
         public string Country { get; set; }
         public List<Fixture> Fixtures { get; set; }
     }

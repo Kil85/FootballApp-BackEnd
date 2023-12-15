@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FootballResultsApi.Entities
 {
@@ -12,8 +13,6 @@ namespace FootballResultsApi.Entities
         public DbSet<Fixture> Fixtures { get; set; }
         public DbSet<League> Leagues { get; set; }
         public DbSet<Team> Teams { get; set; }
-
-        //public DbSet<Country> Countries { get; set; }
         public DbSet<MetaData> MetaDatas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -43,6 +42,13 @@ namespace FootballResultsApi.Entities
 
             modelBuilder.Entity<Team>().Property(e => e.Id).ValueGeneratedNever();
             modelBuilder.Entity<Fixture>().Property(e => e.Id).ValueGeneratedNever();
+
+            var converter = new ValueConverter<DateOnly, DateTime>(
+                dateOnly => dateOnly.ToDateTime(new TimeOnly(0)),
+                dateTime => DateOnly.FromDateTime(dateTime)
+            );
+
+            modelBuilder.Entity<MetaData>().Property(e => e.FixtureDate).HasConversion(converter);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FootballResultsApi.Migrations
 {
     [DbContext(typeof(FootballResultsDbContext))]
-    [Migration("20231214224017_init")]
+    [Migration("20231214235452_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -48,6 +48,9 @@ namespace FootballResultsApi.Migrations
                     b.Property<int>("LeagueId")
                         .HasColumnType("int");
 
+                    b.Property<int>("MetaDataId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Referee")
                         .HasColumnType("nvarchar(max)");
 
@@ -64,6 +67,8 @@ namespace FootballResultsApi.Migrations
                     b.HasIndex("HomeTeamId");
 
                     b.HasIndex("LeagueId");
+
+                    b.HasIndex("MetaDataId");
 
                     b.ToTable("Fixtures");
                 });
@@ -184,11 +189,19 @@ namespace FootballResultsApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("FootballResultsApi.Entities.MetaData", "MetaData")
+                        .WithMany("Fixtures")
+                        .HasForeignKey("MetaDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("AwayTeam");
 
                     b.Navigation("HomeTeam");
 
                     b.Navigation("League");
+
+                    b.Navigation("MetaData");
                 });
 
             modelBuilder.Entity("FootballResultsApi.Entities.Team", b =>
@@ -218,6 +231,11 @@ namespace FootballResultsApi.Migrations
                     b.Navigation("Fixtures");
 
                     b.Navigation("Teams");
+                });
+
+            modelBuilder.Entity("FootballResultsApi.Entities.MetaData", b =>
+                {
+                    b.Navigation("Fixtures");
                 });
 
             modelBuilder.Entity("FootballResultsApi.Entities.Team", b =>

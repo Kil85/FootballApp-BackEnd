@@ -90,7 +90,8 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 var scope = app.Services.CreateScope();
 var fetchApi = scope.ServiceProvider.GetRequiredService<FetchApiData>();
 
-await fetchApi.FeachFixtures();
+//await fetchApi.FeachFixtures(DateOnly.FromDateTime(DateTime.Now).AddDays(-10));
+await fetchApi.StartApp();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
