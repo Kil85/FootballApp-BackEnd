@@ -1,2 +1,2 @@
 Dodac exception w try catch przy zamianie na json w FetchApiData.saveResponse()
-Dodac DTO dla Fixture i pozostalych powiazanych
+Dodac exception w FixtureService w GetFixtureDtosByDate

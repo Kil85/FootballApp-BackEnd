@@ -7,7 +7,10 @@ namespace FootballResultsApi.Models
         public int Id { get; set; }
         public string Referee { get; set; }
         public string TimeZone { get; set; }
-        public DateTime Date { get; set; }
+
+        //public DateTime Date { get; set; }
+        public string Date { get; set; }
+        public string Time { get; set; }
         public string Status { get; set; }
         public int? HomeTeamGoals { get; set; }
         public int? AwayTeamGoals { get; set; }

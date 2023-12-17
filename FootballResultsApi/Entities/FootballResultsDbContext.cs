@@ -13,6 +13,7 @@ namespace FootballResultsApi.Entities
         public DbSet<Fixture> Fixtures { get; set; }
         public DbSet<League> Leagues { get; set; }
         public DbSet<Team> Teams { get; set; }
+        public DbSet<Country> Countries { get; set; }
         public DbSet<MetaData> MetaDatas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

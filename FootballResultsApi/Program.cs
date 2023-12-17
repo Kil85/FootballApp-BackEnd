@@ -64,6 +64,7 @@ builder.Services.AddDbContext<FootballResultsDbContext>(
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IFixtureService, FixtureSevice>();
 builder.Services.AddScoped<FetchApiData>();
 builder.Services.AddScoped<ExceptionHandlingMiddleware>();
 builder.Logging.ClearProviders();
@@ -90,8 +91,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 var scope = app.Services.CreateScope();
 var fetchApi = scope.ServiceProvider.GetRequiredService<FetchApiData>();
 
-//await fetchApi.FeachFixtures(DateOnly.FromDateTime(DateTime.Now).AddDays(-10));
-await fetchApi.StartApp();
+await fetchApi.startApp();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

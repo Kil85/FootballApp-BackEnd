@@ -9,10 +9,14 @@ namespace FootballResultsApi.Helpers
         public MappProfile()
         {
             CreateMap<LoginUserDto, User>();
+            CreateMap<Models.Country, Entities.Country>();
 
             CreateMap<Entities.Team, TeamDto>();
 
-            CreateMap<League, LeagueDto>();
+            CreateMap<League, LeagueDto>()
+                .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Country));
+
+            CreateMap<Entities.Country, CountryDto>();
 
             CreateMap<Fixture, FixtureDto>()
                 .ForMember(dest => dest.League, opt => opt.MapFrom(src => src.League))

@@ -12,17 +12,16 @@ namespace FootballResultsApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Leagues",
+                name: "Countries",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Logo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Country = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Leagues", x => x.Id);
+                    table.PrimaryKey("PK_Countries", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -31,7 +30,8 @@ namespace FootballResultsApi.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    LastRefresh = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    LastRefresh = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FixtureDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -52,21 +52,21 @@ namespace FootballResultsApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Teams",
+                name: "Leagues",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Logo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LeagueId = table.Column<int>(type: "int", nullable: false)
+                    CountryId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Teams", x => x.Id);
+                    table.PrimaryKey("PK_Leagues", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Teams_Leagues_LeagueId",
-                        column: x => x.LeagueId,
-                        principalTable: "Leagues",
+                        name: "FK_Leagues_Countries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "Countries",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -88,6 +88,26 @@ namespace FootballResultsApi.Migrations
                         name: "FK_Users_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Teams",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Logo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LeagueId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Teams", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Teams_Leagues_LeagueId",
+                        column: x => x.LeagueId,
+                        principalTable: "Leagues",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -158,6 +178,11 @@ namespace FootballResultsApi.Migrations
                 column: "MetaDataId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Leagues_CountryId",
+                table: "Leagues",
+                column: "CountryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Teams_LeagueId",
                 table: "Teams",
                 column: "LeagueId");
@@ -188,6 +213,9 @@ namespace FootballResultsApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "Leagues");
+
+            migrationBuilder.DropTable(
+                name: "Countries");
         }
     }
 }

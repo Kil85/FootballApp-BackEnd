@@ -4,6 +4,7 @@ using FootballResultsApi.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FootballResultsApi.Migrations
 {
     [DbContext(typeof(FootballResultsDbContext))]
-    partial class FootballResultsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231215155552_Country-Refactor")]
+    partial class CountryRefactor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,8 +58,8 @@ namespace FootballResultsApi.Migrations
                     b.Property<int>("AwayTeamId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Date")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("HomeTeamGoals")
                         .HasColumnType("int");
@@ -74,9 +77,6 @@ namespace FootballResultsApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Time")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TimeZone")

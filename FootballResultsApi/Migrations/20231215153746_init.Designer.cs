@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FootballResultsApi.Migrations
 {
     [DbContext(typeof(FootballResultsDbContext))]
-    [Migration("20231215002206_metaData-Updated")]
-    partial class metaDataUpdated
+    [Migration("20231215153746_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,22 @@ namespace FootballResultsApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("FootballResultsApi.Entities.Country", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Countries");
+                });
 
             modelBuilder.Entity("FootballResultsApi.Entities.Fixture", b =>
                 {
@@ -78,8 +94,8 @@ namespace FootballResultsApi.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.Property<string>("Country")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Logo")
                         .HasColumnType("nvarchar(max)");
@@ -88,6 +104,8 @@ namespace FootballResultsApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CountryId");
 
                     b.ToTable("Leagues");
                 });
@@ -207,6 +225,17 @@ namespace FootballResultsApi.Migrations
                     b.Navigation("MetaData");
                 });
 
+            modelBuilder.Entity("FootballResultsApi.Entities.League", b =>
+                {
+                    b.HasOne("FootballResultsApi.Entities.Country", "Country")
+                        .WithMany("Leagues")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
+                });
+
             modelBuilder.Entity("FootballResultsApi.Entities.Team", b =>
                 {
                     b.HasOne("FootballResultsApi.Entities.League", "League")
@@ -227,6 +256,11 @@ namespace FootballResultsApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("FootballResultsApi.Entities.Country", b =>
+                {
+                    b.Navigation("Leagues");
                 });
 
             modelBuilder.Entity("FootballResultsApi.Entities.League", b =>

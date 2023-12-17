@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FootballResultsApi.Migrations
 {
     [DbContext(typeof(FootballResultsDbContext))]
-    [Migration("20231214235452_init")]
-    partial class init
+    [Migration("20231217000814_Fixture-Changed")]
+    partial class FixtureChanged
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,28 @@ namespace FootballResultsApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("FootballResultsApi.Entities.Country", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Flag")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Countries");
+                });
 
             modelBuilder.Entity("FootballResultsApi.Entities.Fixture", b =>
                 {
@@ -36,8 +58,8 @@ namespace FootballResultsApi.Migrations
                     b.Property<int>("AwayTeamId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Date")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("HomeTeamGoals")
                         .HasColumnType("int");
@@ -55,6 +77,9 @@ namespace FootballResultsApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Time")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TimeZone")
@@ -78,8 +103,8 @@ namespace FootballResultsApi.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.Property<string>("Country")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Logo")
                         .HasColumnType("nvarchar(max)");
@@ -88,6 +113,8 @@ namespace FootballResultsApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CountryId");
 
                     b.ToTable("Leagues");
                 });
@@ -99,6 +126,9 @@ namespace FootballResultsApi.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("FixtureDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("LastRefresh")
                         .HasColumnType("datetime2");
@@ -204,6 +234,17 @@ namespace FootballResultsApi.Migrations
                     b.Navigation("MetaData");
                 });
 
+            modelBuilder.Entity("FootballResultsApi.Entities.League", b =>
+                {
+                    b.HasOne("FootballResultsApi.Entities.Country", "Country")
+                        .WithMany("Leagues")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
+                });
+
             modelBuilder.Entity("FootballResultsApi.Entities.Team", b =>
                 {
                     b.HasOne("FootballResultsApi.Entities.League", "League")
@@ -224,6 +265,11 @@ namespace FootballResultsApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("FootballResultsApi.Entities.Country", b =>
+                {
+                    b.Navigation("Leagues");
                 });
 
             modelBuilder.Entity("FootballResultsApi.Entities.League", b =>
