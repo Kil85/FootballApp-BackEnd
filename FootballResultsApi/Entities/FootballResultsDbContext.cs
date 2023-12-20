@@ -40,8 +40,11 @@ namespace FootballResultsApi.Entities
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<League>().Property(e => e.Id).ValueGeneratedNever();
+            modelBuilder.Entity<League>().HasMany(u => u.Users).WithMany(l => l.Leagues);
 
             modelBuilder.Entity<Team>().Property(e => e.Id).ValueGeneratedNever();
+            modelBuilder.Entity<Team>().HasMany(u => u.Users).WithMany(t => t.Teams);
+
             modelBuilder.Entity<Fixture>().Property(e => e.Id).ValueGeneratedNever();
 
             var converter = new ValueConverter<DateOnly, DateTime>(

@@ -41,9 +41,9 @@ namespace FootballResultsApi.Controllers
         [HttpPost("login")]
         public ActionResult Login([FromBody] LoginUserDto login)
         {
-            var jwtToken = _accountService.Login(login);
-
-            return Ok(jwtToken);
+            var userDto = _accountService.Login(login);
+            ;
+            return Ok(userDto);
         }
 
         [HttpGet("all")]

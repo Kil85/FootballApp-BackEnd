@@ -1,4 +1,5 @@
-﻿using FootballResultsApi.Models;
+﻿using FootballResultsApi.Interfaces;
+using FootballResultsApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FootballResultsApi.Controllers
@@ -7,40 +8,25 @@ namespace FootballResultsApi.Controllers
     [ApiController]
     public class FavouriteController : ControllerBase
     {
-        [HttpPost("match")]
-        public ActionResult AddFavMatch([FromQuery] int userId, [FromQuery] int matchId)
+        private readonly IFavouriteService _favourite;
+
+        public FavouriteController(IFavouriteService favourite)
         {
-            return null;
+            _favourite = favourite;
         }
 
-        [HttpPost("league")]
-        public ActionResult AddFavLeague([FromQuery] int userId, [FromQuery] int leagueId)
+        [HttpPost("team")]
+        public ActionResult AddFavouriteTeam([FromBody] FavouriteDto favouriteDto)
         {
-            return null;
+            _favourite.AddFavouriteTeam(favouriteDto);
+            return Ok();
         }
 
-        [HttpDelete("match")]
-        public ActionResult RemoveFavMatch([FromQuery] int userId, [FromQuery] int matchId)
+        [HttpDelete("team")]
+        public ActionResult RemoveFavouriteTeam([FromBody] FavouriteDto favouriteDto)
         {
-            return null;
-        }
-
-        [HttpDelete("league")]
-        public ActionResult RemoveFavLeagueh([FromQuery] int userId, [FromQuery] int leagueId)
-        {
-            return null;
-        }
-
-        [HttpPost("player")]
-        public ActionResult AddFavPlayer([FromQuery] int userId, [FromQuery] int playerId)
-        {
-            return null;
-        }
-
-        [HttpDelete("player")]
-        public ActionResult RemoveFavPlayer([FromQuery] int userId, [FromQuery] int playerId)
-        {
-            return null;
+            _favourite.DeleteFavouriteTeam(favouriteDto);
+            return Ok();
         }
     }
 }

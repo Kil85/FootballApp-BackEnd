@@ -26,7 +26,7 @@ namespace FootballResultsApi.Services
         public async Task StartApp()
         {
             await fetchCountries();
-            checkDepricatedData();
+            await checkDepricatedData();
 
             var currentDate = DateOnly.FromDateTime(DateTime.Now);
             int i = -7;
@@ -35,6 +35,10 @@ namespace FootballResultsApi.Services
                 await FeachFixtures(currentDate.AddDays(i));
                 i++;
             }
+
+            //var json = fromFile();
+            //DateOnly specificDate = new DateOnly(2023, 12, 18);
+            //saveResponse(json, specificDate);
         }
 
         public async Task<List<List<FixtureDto>>> GetFixtureDtosByDate(string date)
@@ -42,15 +46,16 @@ namespace FootballResultsApi.Services
             if (DateTime.TryParse(date, out DateTime parsedDate))
             {
                 DateOnly dateOnly = new DateOnly(parsedDate.Year, parsedDate.Month, parsedDate.Day);
-                var fixtures = _context.Fixtures
+                var fixturesByDate = await _context.Fixtures
                     .Include(r => r.League)
                     .ThenInclude(l => l.Country)
                     .Include(m => m.MetaData)
                     .Include(h => h.HomeTeam)
                     .Include(h => h.AwayTeam)
-                    .ToList();
+                    .Where(f => f.MetaData.FixtureDate == dateOnly)
+                    .ToListAsync();
 
-                var fixturesByDate = fixtures.FindAll(f => f.MetaData.FixtureDate == dateOnly);
+                //var fixturesByDate = fixtures.Where(f => f.MetaData.FixtureDate == dateOnly).ToListAsync();
 
                 if (!fixturesByDate.Any())
                 {
@@ -69,7 +74,8 @@ namespace FootballResultsApi.Services
 
         private async Task<List<Fixture>> FeachFixtures(DateOnly date)
         {
-            if (!checkIfFixtureExist(date))
+            var doesExist = await checkIfFixtureExist(date);
+            if (!doesExist)
                 return null;
 
             using (var client = new HttpClient())
@@ -91,7 +97,7 @@ namespace FootballResultsApi.Services
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
 
-                    var fixtures = saveResponse(responseBody, date);
+                    var fixtures = await saveResponse(responseBody, date);
                     Console.Out.WriteLine("finished!");
                     return fixtures;
                 }
@@ -99,7 +105,7 @@ namespace FootballResultsApi.Services
             }
         }
 
-        private List<Fixture> saveResponse(string responseString, DateOnly date)
+        private async Task<List<Fixture>> saveResponse(string responseString, DateOnly date)
         {
             FixtureResponse response = null;
             try
@@ -121,16 +127,16 @@ namespace FootballResultsApi.Services
             var newTeams = new List<Entities.Team>();
             var newLeagues = new List<Entities.League>();
             var metaData = new MetaData() { LastRefresh = DateTime.Now, FixtureDate = date };
-            _context.Add(metaData);
-            _context.SaveChanges();
+            await _context.AddAsync(metaData);
+            await _context.SaveChangesAsync();
             foreach (var fixtureData in response.Response)
             {
                 if (
-                    legues.FirstOrDefault(i => i.Id == fixtureData.League.Id) == null
+                    await legues.FirstOrDefaultAsync(i => i.Id == fixtureData.League.Id) == null
                     && newLeagues.FirstOrDefault(n => n.Id == fixtureData.League.Id) == null
                 )
                 {
-                    var country = countries.FirstOrDefault(
+                    var country = await countries.FirstOrDefaultAsync(
                         c => c.Name == fixtureData.League.Country
                     );
                     var newLeague = new League()
@@ -144,7 +150,7 @@ namespace FootballResultsApi.Services
                 }
 
                 if (
-                    teams.FirstOrDefault(i => i.Id == fixtureData.Teams.Home.Id) == null
+                    await teams.FirstOrDefaultAsync(i => i.Id == fixtureData.Teams.Home.Id) == null
                     && newTeams.FirstOrDefault(n => n.Id == fixtureData.Teams.Home.Id) == null
                 )
                 {
@@ -158,7 +164,7 @@ namespace FootballResultsApi.Services
                     newTeams.Add(newTeam);
                 }
                 if (
-                    teams.FirstOrDefault(i => i.Id == fixtureData.Teams.Away.Id) == null
+                    await teams.FirstOrDefaultAsync(i => i.Id == fixtureData.Teams.Away.Id) == null
                     && newTeams.FirstOrDefault(n => n.Id == fixtureData.Teams.Away.Id) == null
                 )
                 {
@@ -188,18 +194,19 @@ namespace FootballResultsApi.Services
                 };
                 fixtures.Add(fixture);
             }
-            _context.AddRange(newLeagues);
-            _context.SaveChanges();
+            await _context.AddRangeAsync(newLeagues);
+            await _context.SaveChangesAsync();
 
-            _context.AddRange(newTeams);
-            _context.SaveChanges();
+            await _context.AddRangeAsync(newTeams);
+            await _context.SaveChangesAsync();
 
-            _context.AddRange(fixtures);
-            _context.SaveChanges();
+            await _context.AddRangeAsync(fixtures);
+            await _context.SaveChangesAsync();
             return fixtures;
         }
 
-        private bool checkIfFixtureExist(DateOnly fixtureDate)
+        private async Task<bool> checkIfFixtureExist(DateOnly fixtureDate)
+        //private bool checkIfFixtureExist(DateOnly fixtureDate)
         {
             var metaData = _context.MetaDatas.FirstOrDefault(i => i.FixtureDate == fixtureDate);
             if (metaData == null)
@@ -219,7 +226,7 @@ namespace FootballResultsApi.Services
             return false;
         }
 
-        private void checkDepricatedData()
+        private async Task checkDepricatedData()
         {
             var metaData = _context.MetaDatas;
             var currentTime = DateTime.Now;
@@ -308,6 +315,33 @@ namespace FootballResultsApi.Services
             Console.WriteLine();
             _context.AddRange(mappedCountries);
             _context.SaveChanges();
+        }
+
+        private string fromFile()
+        {
+            string filePath =
+                "C:\\Users\\kil85\\source\\repos\\FootballResultsApi\\FootballResultsApi\\Helpers\\json.txt";
+            string text = "";
+
+            try
+            {
+                // Odczytanie całego tekstu z pliku
+                text = File.ReadAllText(filePath);
+                //Console.WriteLine(text);
+
+                // Odczytanie linia po linii
+                //string[] lines = File.ReadAllLines(filePath);
+                //foreach (string line in lines)
+                //{
+                //    Console.WriteLine(line);
+                //}
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine("Błąd odczytu pliku: " + e.Message);
+            }
+
+            return text;
         }
     }
 }

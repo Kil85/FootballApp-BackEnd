@@ -51,10 +51,12 @@ namespace FootballResultsApi.Services
             return user.Id;
         }
 
-        public string Login(LoginUserDto loginDto)
+        public UserDto Login(LoginUserDto loginDto)
         {
             var user = _dbContext.Users
                 .Include(r => r.Role)
+                .Include(t => t.Teams)
+                .Include(l => l.Leagues)
                 .FirstOrDefault(u => u.Email == loginDto.Email);
 
             if (user == null)
@@ -85,7 +87,7 @@ namespace FootballResultsApi.Services
             );
 
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddDays(_authenticationSettings.JwtExpiredDays);
+            var expires = DateTime.Now.AddMinutes(_authenticationSettings.JwtExpiredDays);
 
             var token = new JwtSecurityToken(
                 _authenticationSettings.JwtIssuer,
@@ -96,7 +98,11 @@ namespace FootballResultsApi.Services
             );
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            return tokenHandler.WriteToken(token);
+            var createdToken = tokenHandler.WriteToken(token);
+            var result = _mapper.Map<UserDto>(user);
+            result.JWT = createdToken;
+
+            return result;
         }
 
         public IEnumerable<User> getAllUsers()

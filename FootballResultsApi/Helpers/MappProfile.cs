@@ -22,6 +22,16 @@ namespace FootballResultsApi.Helpers
                 .ForMember(dest => dest.League, opt => opt.MapFrom(src => src.League))
                 .ForMember(dest => dest.HomeTeam, opt => opt.MapFrom(src => src.HomeTeam))
                 .ForMember(dest => dest.AwayTeam, opt => opt.MapFrom(src => src.AwayTeam));
+
+            CreateMap<User, UserDto>()
+                .ForMember(
+                    dest => dest.LeaguesIds,
+                    opt => opt.MapFrom(src => src.Leagues.Select(l => l.Id))
+                )
+                .ForMember(
+                    dest => dest.TeamsIds,
+                    opt => opt.MapFrom(src => src.Teams.Select(t => t.Id))
+                );
         }
     }
 }

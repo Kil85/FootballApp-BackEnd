@@ -65,6 +65,7 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IFixtureService, FixtureSevice>();
+builder.Services.AddScoped<IFavouriteService, FavouriteService>();
 builder.Services.AddScoped<FetchApiData>();
 builder.Services.AddScoped<ExceptionHandlingMiddleware>();
 builder.Logging.ClearProviders();

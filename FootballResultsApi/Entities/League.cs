@@ -11,5 +11,6 @@ namespace FootballResultsApi.Entities
         public int CountryId { get; set; }
         public virtual Country Country { get; set; }
         public List<Fixture> Fixtures { get; set; }
+        public List<User> Users { get; set; }
     }
 }
