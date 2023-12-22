@@ -5,6 +5,7 @@ namespace FootballResultsApi.Interfaces
     public interface IFixtureService
     {
         Task StartApp();
-        Task<List<List<FixtureDto>>> GetFixtureDtosByDate(string date);
+        List<List<FixtureDto>> GetFixtureDtosByDate(string date);
+        Task checkDepricatedData();
     }
 }

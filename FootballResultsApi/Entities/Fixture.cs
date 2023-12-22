@@ -22,5 +22,6 @@
         public virtual Team HomeTeam { get; set; }
         public int AwayTeamId { get; set; }
         public virtual Team AwayTeam { get; set; }
+        public List<User> Users { get; set; } = new List<User>();
     }
 }

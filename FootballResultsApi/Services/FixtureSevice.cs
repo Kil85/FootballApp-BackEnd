@@ -26,7 +26,6 @@ namespace FootballResultsApi.Services
         public async Task StartApp()
         {
             await fetchCountries();
-            await checkDepricatedData();
 
             var currentDate = DateOnly.FromDateTime(DateTime.Now);
             int i = -7;
@@ -35,32 +34,24 @@ namespace FootballResultsApi.Services
                 await FeachFixtures(currentDate.AddDays(i));
                 i++;
             }
-
-            //var json = fromFile();
-            //DateOnly specificDate = new DateOnly(2023, 12, 18);
-            //saveResponse(json, specificDate);
         }
 
-        public async Task<List<List<FixtureDto>>> GetFixtureDtosByDate(string date)
+        public List<List<FixtureDto>> GetFixtureDtosByDate(string date)
         {
             if (DateTime.TryParse(date, out DateTime parsedDate))
             {
                 DateOnly dateOnly = new DateOnly(parsedDate.Year, parsedDate.Month, parsedDate.Day);
-                var fixturesByDate = await _context.Fixtures
+                var fixtures = _context.Fixtures
                     .Include(r => r.League)
                     .ThenInclude(l => l.Country)
                     .Include(m => m.MetaData)
                     .Include(h => h.HomeTeam)
                     .Include(h => h.AwayTeam)
+                    .ToList();
+
+                var fixturesByDate = fixtures
                     .Where(f => f.MetaData.FixtureDate == dateOnly)
-                    .ToListAsync();
-
-                //var fixturesByDate = fixtures.Where(f => f.MetaData.FixtureDate == dateOnly).ToListAsync();
-
-                if (!fixturesByDate.Any())
-                {
-                    await FeachFixtures(dateOnly);
-                }
+                    .ToList();
 
                 var mappedFixtures = _mapper.Map<List<FixtureDto>>(fixturesByDate);
 
@@ -206,39 +197,41 @@ namespace FootballResultsApi.Services
         }
 
         private async Task<bool> checkIfFixtureExist(DateOnly fixtureDate)
-        //private bool checkIfFixtureExist(DateOnly fixtureDate)
         {
             var metaData = _context.MetaDatas.FirstOrDefault(i => i.FixtureDate == fixtureDate);
             if (metaData == null)
             {
                 return true;
             }
-
-            var currentTime = DateTime.Now;
-            var timeDifference = currentTime - metaData.LastRefresh;
-
-            if (timeDifference.TotalHours > 24)
-            {
-                _context.Remove(metaData);
-                _context.SaveChanges();
-                return true;
-            }
             return false;
         }
 
-        private async Task checkDepricatedData()
+        public async Task checkDepricatedData()
         {
             var metaData = _context.MetaDatas;
             var currentTime = DateTime.Now;
             var isChanged = false;
+
             foreach (var data in metaData)
             {
                 var fixtureDate = data.FixtureDate.ToDateTime(new TimeOnly(0));
                 var timeDifference = (currentTime - fixtureDate).Days;
                 if (Math.Abs(timeDifference) > 7)
                 {
-                    _context.Remove(data);
+                    _context.MetaDatas.Remove(data);
                     isChanged = true;
+                }
+                else
+                {
+                    var lastRefresh = DateOnly.FromDateTime(data.LastRefresh);
+
+                    var timeDif = currentTime - data.LastRefresh;
+
+                    if (timeDif.TotalHours > 24)
+                    {
+                        _context.MetaDatas.Remove(data);
+                        isChanged = true;
+                    }
                 }
             }
             if (isChanged)
@@ -325,16 +318,7 @@ namespace FootballResultsApi.Services
 
             try
             {
-                // Odczytanie całego tekstu z pliku
                 text = File.ReadAllText(filePath);
-                //Console.WriteLine(text);
-
-                // Odczytanie linia po linii
-                //string[] lines = File.ReadAllLines(filePath);
-                //foreach (string line in lines)
-                //{
-                //    Console.WriteLine(line);
-                //}
             }
             catch (IOException e)
             {

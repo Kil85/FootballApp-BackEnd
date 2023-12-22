@@ -28,5 +28,28 @@ namespace FootballResultsApi.Controllers
             _favourite.DeleteFavouriteTeam(favouriteDto);
             return Ok();
         }
+
+        [HttpPost("league")]
+        public ActionResult AddFavouriteLeague([FromBody] FavouriteDto favouriteDto)
+        {
+            _favourite.AddFavouriteLeague(favouriteDto);
+
+            return Ok();
+        }
+
+        [HttpDelete("league")]
+        public ActionResult RemoveFavouriteLeague([FromBody] FavouriteDto favouriteDto)
+        {
+            _favourite.DeleteFavouriteLeague(favouriteDto);
+
+            return Ok();
+        }
+
+        [HttpGet("favteams")]
+        public ActionResult GetFixturesOfFavTeam([FromQuery] int userId)
+        {
+            var result = _favourite.GetFixtureListbyFavouriteTeams(userId);
+            return Ok(result);
+        }
     }
 }

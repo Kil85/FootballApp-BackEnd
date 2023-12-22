@@ -87,7 +87,7 @@ namespace FootballResultsApi.Services
             );
 
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddMinutes(_authenticationSettings.JwtExpiredDays);
+            var expires = DateTime.Now.AddHours(_authenticationSettings.JwtExpiredDays);
 
             var token = new JwtSecurityToken(
                 _authenticationSettings.JwtIssuer,

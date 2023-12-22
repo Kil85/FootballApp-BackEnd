@@ -1,4 +1,5 @@
-﻿using FootballResultsApi.Models;
+﻿using FootballResultsApi.Entities;
+using FootballResultsApi.Models;
 
 namespace FootballResultsApi.Interfaces
 {
@@ -6,5 +7,8 @@ namespace FootballResultsApi.Interfaces
     {
         void AddFavouriteTeam(FavouriteDto favouriteDto);
         void DeleteFavouriteTeam(FavouriteDto favouriteDto);
+        void AddFavouriteLeague(FavouriteDto favouriteDto);
+        void DeleteFavouriteLeague(FavouriteDto favouriteDto);
+        List<FixtureDto> GetFixtureListbyFavouriteTeams(int userId);
     }
 }

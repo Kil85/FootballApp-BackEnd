@@ -16,6 +16,7 @@ namespace FootballResultsApi.Helpers
 
         public async Task startApp()
         {
+            await _fixtureService.checkDepricatedData();
             await _fixtureService.StartApp();
         }
     }
