@@ -10,11 +10,17 @@ namespace FootballResultsApi.Services
     {
         private readonly IMapper _mapper;
         private readonly FootballResultsDbContext _context;
+        private readonly IFixtureService _fixtureService;
 
-        public FavouriteService(IMapper mapper, FootballResultsDbContext context)
+        public FavouriteService(
+            IMapper mapper,
+            FootballResultsDbContext context,
+            IFixtureService fixtureService
+        )
         {
             _mapper = mapper;
             _context = context;
+            _fixtureService = fixtureService;
         }
 
         public void AddFavouriteTeam(FavouriteDto favouriteDto)
@@ -109,7 +115,7 @@ namespace FootballResultsApi.Services
             _context.SaveChanges();
         }
 
-        public List<FixtureDto> GetFixtureListbyFavouriteTeams(int userId)
+        public List<TeamNFavMatches> GetFixtureListbyFavouriteTeams(int userId)
         {
             var user = _context.Users.Include(l => l.Teams).FirstOrDefault(i => i.Id == userId);
 
@@ -124,6 +130,7 @@ namespace FootballResultsApi.Services
                 return null;
             }
             var listOfTeams = user.Teams.Select(t => t.Id);
+            var r = new List<TeamNFavMatches>();
 
             var fixtures = _context.Fixtures
                 .Include(r => r.League)
@@ -131,14 +138,21 @@ namespace FootballResultsApi.Services
                 .Include(m => m.MetaData)
                 .Include(h => h.HomeTeam)
                 .Include(h => h.AwayTeam)
-                .Include(u => u.Users)
-                .Where(
-                    t => listOfTeams.Contains(t.HomeTeamId) || listOfTeams.Contains(t.AwayTeamId)
-                )
-                .ToList();
+                .Include(u => u.Users);
 
-            var result = _mapper.Map<List<FixtureDto>>(fixtures);
-            return result;
+            foreach (var team in user.Teams)
+            {
+                var newDto = new TeamNFavMatches();
+                newDto.Team = _mapper.Map<TeamDto>(team);
+                var matches = fixtures
+                    .Where(t => t.HomeTeamId == team.Id || t.AwayTeamId == team.Id)
+                    .ToList();
+                var mappedMatches = _mapper.Map<List<FixtureDto>>(matches);
+                newDto.Fixtures = _fixtureService.GroupFixturesByLeague(mappedMatches);
+                r.Add(newDto);
+            }
+
+            return r;
         }
     }
 }

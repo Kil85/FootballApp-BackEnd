@@ -9,6 +9,6 @@ namespace FootballResultsApi.Interfaces
         void DeleteFavouriteTeam(FavouriteDto favouriteDto);
         void AddFavouriteLeague(FavouriteDto favouriteDto);
         void DeleteFavouriteLeague(FavouriteDto favouriteDto);
-        List<FixtureDto> GetFixtureListbyFavouriteTeams(int userId);
+        List<TeamNFavMatches> GetFixtureListbyFavouriteTeams(int userId);
     }
 }

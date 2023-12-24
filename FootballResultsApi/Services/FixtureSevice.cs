@@ -240,6 +240,30 @@ namespace FootballResultsApi.Services
             }
         }
 
+        public List<List<FixtureDto>> GroupFixturesByLeague(List<FixtureDto> fixtures)
+        {
+            // Grupowanie FixtureDto na podstawie LeagueDto
+            var groupedFixtures = fixtures
+                .GroupBy(fixture => fixture.League.Id)
+                .Select(group => group.ToList())
+                .ToList();
+
+            int[] specificLeagueIds = { 1, 2, 3, 4, 15, 848, 39, 140, 135, 78, 61 }; // Określone ID ligi, które chcesz umieścić na początku
+
+            // Wyodrębnienie grup o konkretnych ID ligi i ich usunięcie z listy
+            var specificGroups = groupedFixtures
+                .Where(list => specificLeagueIds.Contains(list.FirstOrDefault()?.League.Id ?? -1))
+                .ToList();
+            groupedFixtures.RemoveAll(
+                list => specificLeagueIds.Contains(list.FirstOrDefault()?.League.Id ?? -1)
+            );
+
+            // Sortowanie listy groupedFixtures
+            groupedFixtures = specificGroups.Concat(groupedFixtures).ToList();
+
+            return groupedFixtures;
+        }
+
         private async Task fetchCountries()
         {
             var countries = _context.Countries;
@@ -266,30 +290,6 @@ namespace FootballResultsApi.Services
                 }
                 throw new Exception("FeachFixtures Exception");
             }
-        }
-
-        private List<List<FixtureDto>> GroupFixturesByLeague(List<FixtureDto> fixtures)
-        {
-            // Grupowanie FixtureDto na podstawie LeagueDto
-            var groupedFixtures = fixtures
-                .GroupBy(fixture => fixture.League.Id)
-                .Select(group => group.ToList())
-                .ToList();
-
-            int[] specificLeagueIds = { 1, 2, 3, 4, 15, 848, 39, 140, 135, 78, 61 }; // Określone ID ligi, które chcesz umieścić na początku
-
-            // Wyodrębnienie grup o konkretnych ID ligi i ich usunięcie z listy
-            var specificGroups = groupedFixtures
-                .Where(list => specificLeagueIds.Contains(list.FirstOrDefault()?.League.Id ?? -1))
-                .ToList();
-            groupedFixtures.RemoveAll(
-                list => specificLeagueIds.Contains(list.FirstOrDefault()?.League.Id ?? -1)
-            );
-
-            // Sortowanie listy groupedFixtures
-            groupedFixtures = specificGroups.Concat(groupedFixtures).ToList();
-
-            return groupedFixtures;
         }
 
         private void saveCountriesResponse(string responseString)
