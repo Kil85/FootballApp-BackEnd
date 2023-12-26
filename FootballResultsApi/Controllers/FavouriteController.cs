@@ -51,5 +51,12 @@ namespace FootballResultsApi.Controllers
             var result = _favourite.GetFixtureListbyFavouriteTeams(userId);
             return Ok(result);
         }
+
+        [HttpGet("favleagues")]
+        public ActionResult GetFixturesOfFavLeagues([FromQuery] int userId, [FromQuery] string date)
+        {
+            var result = _favourite.GetFixtureListbyFavouriteLeagues(userId, date);
+            return Ok(result);
+        }
     }
 }
