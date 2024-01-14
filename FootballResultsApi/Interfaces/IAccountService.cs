@@ -8,5 +8,7 @@ namespace FootballResultsApi.Interfaces
         int Register(LoginUserDto userDto);
         UserDto Login(LoginUserDto loginDto);
         IEnumerable<User> getAllUsers();
+        void DeleteAccount(int accountId);
+        void ChangePassword(ChangePasswordDto changePassword);
     }
 }

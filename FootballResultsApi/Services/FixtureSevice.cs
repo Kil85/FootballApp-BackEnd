@@ -33,6 +33,7 @@ namespace FootballResultsApi.Services
             {
                 await FeachFixtures(currentDate.AddDays(i));
                 i++;
+                await Task.Delay(TimeSpan.FromSeconds(7));
             }
         }
 
@@ -76,7 +77,7 @@ namespace FootballResultsApi.Services
                 string formattedDate = date.ToString("yyyy-MM-dd");
 
                 query["date"] = formattedDate;
-                query["season"] = date.Year.ToString();
+                query["season"] = (date.Year - 1).ToString();
                 uriBuilder.Query = query.ToString();
                 string urlWithParams = uriBuilder.ToString();
 
@@ -87,6 +88,13 @@ namespace FootballResultsApi.Services
                 if (response.IsSuccessStatusCode)
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
+                    var fileName = "plik.txt";
+                    var rootPath = Directory.GetCurrentDirectory();
+                    var filePath = $"{rootPath}/{fileName}";
+                    File.AppendAllText(filePath, responseBody);
+                    var brake =
+                        "\n======================================================================\n";
+                    File.AppendAllText(filePath, brake);
 
                     var fixtures = await saveResponse(responseBody, date);
                     Console.Out.WriteLine("finished!");

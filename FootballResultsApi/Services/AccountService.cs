@@ -7,6 +7,7 @@ using FootballResultsApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -108,6 +109,43 @@ namespace FootballResultsApi.Services
         public IEnumerable<User> getAllUsers()
         {
             return _dbContext.Users.Include(r => r.Role);
+        }
+
+        public void DeleteAccount(int accountId)
+        {
+            var user =
+                _dbContext.Users.FirstOrDefault(u => u.Id == accountId)
+                ?? throw new Exception("User not found");
+
+            _dbContext.Users.Remove(user);
+            _dbContext.SaveChanges();
+        }
+
+        public void ChangePassword(ChangePasswordDto changePassword)
+        {
+            var user =
+                _dbContext.Users.FirstOrDefault(u => u.Id == changePassword.UserId)
+                ?? throw new Exception("User not found");
+
+            if (user.Email != changePassword.Mail)
+            {
+                throw new Exception("Wrong Mail");
+            }
+
+            var isPasswordOk = _passwordHasher.VerifyHashedPassword(
+                user,
+                user.HashedPassword,
+                changePassword.OldPassword
+            );
+
+            if (isPasswordOk == PasswordVerificationResult.Failed)
+            {
+                throw new Exception("Old Password incorrect");
+            }
+
+            var hashedPassword = _passwordHasher.HashPassword(user, changePassword.NewPassword);
+            user.HashedPassword = hashedPassword;
+            _dbContext.SaveChanges();
         }
     }
 }

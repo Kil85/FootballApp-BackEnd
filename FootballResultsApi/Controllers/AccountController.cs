@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.SqlServer.Server;
 using RestSharp;
 
@@ -51,6 +52,21 @@ namespace FootballResultsApi.Controllers
         {
             var users = _accountService.getAllUsers();
             return Ok(users.ToList());
+        }
+
+        [HttpDelete("delete")]
+        public ActionResult Delete([FromQuery] int userId)
+        {
+            _accountService.DeleteAccount(userId);
+            return Ok();
+        }
+
+        [HttpPatch("change")]
+        //[Authorize]
+        public ActionResult ChangePassword([FromBody] ChangePasswordDto passwordDto)
+        {
+            _accountService.ChangePassword(passwordDto);
+            return Ok();
         }
     }
 }
